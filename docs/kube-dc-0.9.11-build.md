@@ -21,3 +21,11 @@ Record the provider and Kamaji source revisions with the image. Pin the
 published digest in the fresh-install Fleet profile and select v1alpha2 in
 k8-manager. Artifact scanning and live lifecycle acceptance remain required
 before stable promotion.
+
+## Dependency security follow-up
+
+The candidate selects gRPC 1.83.2, which includes the fix for
+[HTTP/2 memory exhaustion](https://github.com/advisories/GHSA-vp52-pcj8-j9qc).
+The complete Go package suite passes against explicit Kubernetes 1.35 envtest
+assets with no default live kubeconfig. Runtime images must be rebuilt from
+these dependency locks and qualified separately.
