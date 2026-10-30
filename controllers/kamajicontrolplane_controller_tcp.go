@@ -246,9 +246,16 @@ func (r *KamajiControlPlaneReconciler) createOrUpdateTenantControlPlane(ctx cont
 			tcp.Spec.ControlPlane.Deployment.AdditionalContainers = kcp.Spec.Deployment.ExtraContainers
 			tcp.Spec.ControlPlane.Deployment.AdditionalVolumes = kcp.Spec.Deployment.ExtraVolumes
 
-			if kcp.Spec.Deployment.Probes == nil ||
-				kcp.Spec.ApiServer.Probes == nil ||
-				kcp.Spec.ControllerManager.Probes == nil ||
+			// Propagate probe overrides whenever ANY component configures them.
+			// This previously used `||`, which dropped ALL probes unless every one of
+			// Deployment/ApiServer/ControllerManager/Scheduler was set — so configuring
+			// just one (e.g. apiServer probes to widen the kube-apiserver readyz/livez
+			// timeout past the 1s default) was silently discarded and never reached the
+			// TenantControlPlane. kamaji's applyProbeOverrides tolerates nil per-component
+			// specs, so propagating a partial set is safe.
+			if kcp.Spec.Deployment.Probes == nil &&
+				kcp.Spec.ApiServer.Probes == nil &&
+				kcp.Spec.ControllerManager.Probes == nil &&
 				kcp.Spec.Scheduler.Probes == nil {
 				tcp.Spec.ControlPlane.Deployment.Probes = nil
 			} else {
