@@ -1,9 +1,11 @@
 # Build the manager binary
-FROM golang:1.26 AS builder
+FROM golang:1.26.10 AS builder
 ARG TARGETOS
 ARG TARGETARCH
 
 WORKDIR /workspace
+# Supply the reviewed Kube-DC Kamaji fork with --build-context kamaji-src=../kamaji.
+COPY --from=kamaji-src / /kamaji
 # Copy the Go Modules manifests
 COPY go.mod go.mod
 COPY go.sum go.sum
